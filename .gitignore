@@ -1,0 +1,19 @@
+# Build artifacts
+build/
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake-build-*/
+
+# Qt Creator / VS Code
+*.pro.user
+*.qmake.stash
+*.user
+.vscode/
+.idea/
