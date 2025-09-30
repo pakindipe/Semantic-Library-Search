@@ -19,8 +19,10 @@ def query(query:str):
     query_vec = normalize(query_vec)
     scores = embs @ query_vec
     idx = np.argsort(-scores)
-    ordered_titles = titles[idx]
-    return ordered_titles[0:5]
+    ordered_titles = []
+    for i in range(0, 5):
+        ordered_titles.append(titles[idx[i]])
+    return ordered_titles
 
 add_book("Journeys Beyond the Horizon")
 add_book("The Edge of the Map")
