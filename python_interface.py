@@ -1,21 +1,40 @@
 from sentence_transformers import SentenceTransformer
 import numpy as np
-
-
+titles = []
+embs = None
 model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
-vec1 = model.encode("hello this is Dave!", convert_to_numpy=True).astype("float32")
-vec2 = model.encode("hello I am Dave", convert_to_numpy=True).astype("float32")
-vec3 = model.encode("Fundamentals of programming", convert_to_numpy=True).astype("float32")
 
 def normalize(vec):
     return vec / (np.linalg.norm(vec) + 1e-12)
 
-vec1 = normalize(vec1)
-vec2 = normalize(vec2)
-vec3 = normalize(vec3)
+def add_book(title:str):
+    global embs
+    titles.append(title)
+    vec = model.encode(title, convert_to_numpy=True).astype("float32")
+    vec = normalize(vec)
+    embs = vec if embs is None else np.vstack([embs, vec])
 
-if ((vec1 @ vec2) > (vec1 @ vec3)):
-    print("first two sentences are more alike!")
-    print((vec1 @ vec2) - (vec1 @ vec3))
-else:
-    print("first and third are more alike!")
+def query(query:str):
+    query_vec = model.encode(query, convert_to_numpy=True).astype("float32")
+    query_vec = normalize(query_vec)
+    scores = embs @ query_vec
+    idx = np.argsort(-scores)
+    ordered_titles = []
+    for i in range(0, 5):
+        ordered_titles.append(titles[idx[i]])
+    return ordered_titles
+
+add_book("Journeys Beyond the Horizon")
+add_book("The Edge of the Map")
+add_book("Explorers of the Unknown")
+add_book("Into the Farthest Lands")
+add_book("The Path of Discovery")
+add_book("The Depths of Thought")
+add_book("Horizons of the Mind")
+add_book("The Nature of Knowing")
+add_book("Reflections on Reality")
+add_book("The Infinite Within")
+
+results = query("How we think")
+for title in results:
+    print(title)
