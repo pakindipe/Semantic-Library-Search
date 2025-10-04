@@ -9,8 +9,9 @@ Window {
     title: "Library Semantic Search"
 
     StackView{
+        id: stackView
         anchors.fill: parent
-        initialItem: HomePage {}
+        initialItem: "HomePage.qml"
     }
 
 }
