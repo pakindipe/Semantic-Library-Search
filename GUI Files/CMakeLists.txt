@@ -20,6 +20,9 @@ qt_add_qml_module(appLibrarySemanticSearch
         QML_FILES HomePage.qml
         QML_FILES SearchResults.qml
         QML_FILES BookDetails.qml
+
+    RESOURCES
+        assets/cover1.jpg
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
