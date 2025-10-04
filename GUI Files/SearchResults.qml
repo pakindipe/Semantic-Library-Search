@@ -10,9 +10,10 @@ Page {
         height: 50
         color: "#374151"
         Text {
-            text: "Sematic Search System";
+            text: "Semantic Search System";
             font.pointSize: 20
             color: "white"
+            font.bold: true
             font.family: "Times New Roman"
             anchors.centerIn: parent
         }
@@ -54,6 +55,12 @@ Page {
                         color: "White"
                         border.color: "Gray"
                     }
+                    Keys.onReturnPressed: {
+                        if (s.text.trim() !== "") {
+                            query = s.text
+                            s.text = ""
+                        }
+                    }
                 }
                 Button {
                     text: "Search";
@@ -62,23 +69,23 @@ Page {
                         radius: 8
                     }
                     onClicked:  {
-                        query = s.text
-                        s.text = ""
+                        if (s.text.trim() !== "") {
+                            query = s.text
+                            s.text = ""
+                        }
                     }
-                }
-                Keys.onReturnPressed: {
-                    query = s.text
-                    s.text = ""
                 }
             }
             Label {
                 text: "Results for: " + query;
                 font.pointSize: 14
+                font.bold: true
             }
         }
     }
     Column{
         id: resultsArea
+        spacing: 1
         anchors.top: searchBar.bottom
         anchors.left: parent.left
         anchors.right: parent.right
@@ -93,12 +100,14 @@ Page {
         Repeater{
             model: books
             delegate: Rectangle{
+                id: card
                 anchors.horizontalCenter: parent.horizontalCenter
-                width: parent.width*0.8
+                width: parent.width*0.85
                 height: 110
                 radius: 15
                 color: "White"
                 border.color: "Gray"
+
 
                 Row{
                     anchors.fill: parent
@@ -118,6 +127,23 @@ Page {
                         Text{text: "Release: " + release; font.bold:true}
                         spacing: 3
 
+                    }
+                }
+
+                MouseArea{
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onEntered: {
+                        card.border.color = "#9CA3AF"
+                        card.border.width = 2
+                    }
+                    onExited: {
+                        card.border.width = 1
+                        card.border.color = "Gray"
+                    }
+                    onClicked: {
+                        stackView.push(Qt.resolvedUrl("BookDetails.qml"), { "bookTitle": title, "Author": author, "Genre": genre, "Release": release })
                     }
                 }
             }

@@ -10,8 +10,9 @@ Page {
         height: 50
         color: "#374151"
         Text {
-            text: "Sematic Search System";
+            text: "Semantic Search System";
             font.pointSize: 20
+            font.bold: true
             color: "white"
             font.family: "Times New Roman"
             anchors.centerIn: parent
@@ -22,7 +23,7 @@ Page {
         anchors.top: header.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        height: 100
+        height: 80
         color: "#9CA3AF"
         Column{
             anchors.centerIn: parent
