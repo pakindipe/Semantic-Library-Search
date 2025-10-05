@@ -1,5 +1,6 @@
 from sentence_transformers import SentenceTransformer
 import numpy as np
+import sys
 titles = []
 embs = None
 model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
@@ -35,6 +36,7 @@ add_book("The Nature of Knowing")
 add_book("Reflections on Reality")
 add_book("The Infinite Within")
 
-results = query("How we think")
-for title in results:
-    print(title)
+if len(sys.argv) > 1:
+    result = query(sys.argv[1])
+    for r in result:
+        print(r)    
