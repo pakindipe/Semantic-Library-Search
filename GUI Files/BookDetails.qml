@@ -318,7 +318,7 @@ Dialog {
             Text
             {
                 id: descriptionText
-                anchors.fill: parent
+                height: parent.height
                 width: parent.width
                 text: "Description: " + bookDetails.description
                 wrapMode: Text.WordWrap
