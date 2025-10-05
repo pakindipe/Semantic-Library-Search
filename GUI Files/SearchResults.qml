@@ -57,9 +57,11 @@ Page {
                     }
                     Keys.onReturnPressed: {
                         if (s.text.trim() !== "") {
-                            query = s.text
-                            s.text = ""
-                        }
+                             query = s.text
+                             currentPage = 1
+                             loadResults()
+                             s.text = ""
+                         }
                     }
                 }
                 Button {
@@ -70,9 +72,11 @@ Page {
                     }
                     onClicked:  {
                         if (s.text.trim() !== "") {
-                            query = s.text
-                            s.text = ""
-                        }
+                             query = s.text
+                             currentPage = 1
+                             loadResults()
+                             s.text = ""
+                         }
                     }
                 }
             }
@@ -143,11 +147,23 @@ Page {
                         card.border.color = "Gray"
                     }
                     onClicked: {
-                        stackView.push(Qt.resolvedUrl("BookDetails.qml"), { "bookTitle": title, "Author": author, "Genre": genre, "Release": release })
+                        var dialog = bookDetailsComponent.createObject(parent, {
+                            "titleText": title,
+                            "author": author,
+                            "genres": genre,
+                            "releaseDate": release,
+                            "description": "This is a sample description for " + title + ". In a real implementation, this would come from your database or API.",
+                            "image": ""
+                        })
+                        dialog.open()
                     }
                 }
             }
         }
+    }
+    Component {
+        id: bookDetailsComponent
+        BookDetails {}
     }
 }
 
