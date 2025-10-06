@@ -1,7 +1,17 @@
 from sentence_transformers import SentenceTransformer
+import faiss
 import numpy as np
 import sys
-titles = []
+titles = ["Journeys Beyond the Horizon",
+          "The Edge of the Map",
+          "Explorers of the Unknown",
+          "Into the Farthest Lands",
+          "The Path of Discovery",
+          "The Depths of Thought",
+          "Horizons of the Mind",
+          "The Nature of Knowing",
+          "Reflections on Reality",
+          "The Infinite Within"]
 embs = None
 model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 
