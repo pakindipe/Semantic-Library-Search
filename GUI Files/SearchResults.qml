@@ -2,10 +2,48 @@ import QtQuick 2.15
 import QtQuick.Layouts 1.15
 import QtQuick.Controls 2.15
 import QtQuick.Effects
+import LibrarySemanticSearch 1.0     // (already present) used for Search.search()
 
 Page {
     anchors.fill: parent
     property string query: ""
+    property int currentPage: 1       // CHANGE: defined because it's referenced below
+
+    // CHANGE: function that calls the C++/Python bridge and fills the model
+    function loadResults() {
+        const resp = Search.search(query)   // calls core/SearchService → SearchBridge → python_interface.py
+        books.clear()
+
+        if (resp && resp.error) {
+            console.log("Search error:", resp.error)
+            return
+        }
+        if (!resp || !resp.results) {
+            console.log("No results from Search")
+            return
+        }
+
+        // Accept either ["title", ...] or [{title,author,genre,release}, ...]
+        for (let i = 0; i < resp.results.length; ++i) {
+            const r = resp.results[i]
+            if (typeof r === "string") {
+                books.append({
+                    title: r,
+                    author: "",
+                    genre: "",
+                    release: ""
+                })
+            } else {
+                books.append({
+                    title:   r.title   ?? "",
+                    author:  r.author  ?? "",
+                    genre:   r.genre   ?? "",
+                    release: r.release ?? ""
+                })
+            }
+        }
+    }
+
     header: Rectangle {
         height: 50
         color: "#374151"
@@ -30,7 +68,6 @@ Page {
             }
         }
     }
-
 
     Rectangle{
         id: searchBar
@@ -57,11 +94,11 @@ Page {
                     }
                     Keys.onReturnPressed: {
                         if (s.text.trim() !== "") {
-                             query = s.text
-                             currentPage = 1
-                             loadResults()
-                             s.text = ""
-                         }
+                            query = s.text
+                            currentPage = 1
+                            loadResults()     // CHANGE: call into bridge
+                            s.text = ""
+                        }
                     }
                 }
                 Button {
@@ -72,11 +109,11 @@ Page {
                     }
                     onClicked:  {
                         if (s.text.trim() !== "") {
-                             query = s.text
-                             currentPage = 1
-                             loadResults()
-                             s.text = ""
-                         }
+                            query = s.text
+                            currentPage = 1
+                            loadResults()     // CHANGE: call into bridge
+                            s.text = ""
+                        }
                     }
                 }
             }
@@ -87,6 +124,7 @@ Page {
             }
         }
     }
+
     Column{
         id: resultsArea
         spacing: 1
@@ -94,13 +132,16 @@ Page {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.margins: 20
-        ListModel {id: books}
 
+        ListModel { id: books }
+
+        // CHANGE: remove hardcoded demo data; load when page appears
         Component.onCompleted: {
-            books.append({ title: "To Kill a Mockingbird", author: "Harper Lee", genre: "Gothic Novel", release: "1960" })
-            books.append({ title: "To Kill a Kingdom", author: "Alexandra Christo", genre: "Fantasy", release: "2018" })
-            books.append({ title: "The Mockingbird Next Door", author: "Marja Mills", genre: "Autobiography", release: "2014" })
+            if (query && query.length > 0) {
+                loadResults()
+            }
         }
+
         Repeater{
             model: books
             delegate: Rectangle{
@@ -111,7 +152,6 @@ Page {
                 radius: 15
                 color: "White"
                 border.color: "Gray"
-
 
                 Row{
                     anchors.fill: parent
@@ -125,12 +165,11 @@ Page {
                         color: "Black"
                     }
                     Column{
-                        Text{text: "Title: " + title; font.bold:true}
-                        Text{text: "Author: " + author; font.bold:true}
-                        Text{text: "Genre: " + genre; font.bold:true}
-                        Text{text: "Release: " + release; font.bold:true}
+                        Text{ text: "Title: " + title;  font.bold:true }
+                        Text{ text: "Author: " + author; font.bold:true }
+                        Text{ text: "Genre: " + genre;   font.bold:true }
+                        Text{ text: "Release: " + release; font.bold:true }
                         spacing: 3
-
                     }
                 }
 
@@ -161,9 +200,9 @@ Page {
             }
         }
     }
+
     Component {
         id: bookDetailsComponent
         BookDetails {}
     }
 }
-
