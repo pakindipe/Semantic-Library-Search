@@ -12,7 +12,7 @@ class StringEmbedder(tf.Module):
 
     @tf.function(input_signature=[tf.TensorSpec(shape=[None], dtype=tf.string, name="text")])
     def embed(self, text):
-        vecs = self.encode(text)
+        vecs = self.encoder(text)
         normed = tf.math.l2_normalize(vecs, axis=1)
         return {"embedding": normed}
     

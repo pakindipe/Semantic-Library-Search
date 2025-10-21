@@ -1,6 +1,7 @@
 # Build artifacts
 .venv
 build/
+export/
 *.o
 *.obj
 *.exe
