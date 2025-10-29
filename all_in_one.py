@@ -2,14 +2,33 @@ from sentence_transformers import SentenceTransformer
 import numpy as np
 import sys, json
 import faiss
+from pathlib import Path
+import sqlite3
 
-# class Embedder:
-#     def __init__(self):
-#         self.model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+class DB:
+    def __init__(self, path="books.db"):
+        self.path = Path(path)
+        self._init_schema()
+
+    def _conn(self):
+        c = sqlite3.connect(self.path)
+        c.row_factory = sqlite3.Row
+        return c
     
-#     def embed_one(query):
-#         return model.encode(query)
-    
+    def _init_schema(self):
+        schema = """
+        CREATE TABLE IF NOT EXISTS books (
+        id INTEGER PRIMARY KEY
+        title TEXT NOT NULL
+        author TEXT
+        genre TEXT
+        year_published INTEGER
+        )
+        """
+        with self._conn() as c:
+            c.executescript(schema)
+
+
 
 def handle(op, payload):
     if op == "query":
