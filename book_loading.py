@@ -19,20 +19,24 @@ embs = normalize(embs)
 
 d = 384
 
-index = faiss.IndexFlatIP(d)
-index.add(embs)
+index = faiss.IndexIDMap(faiss.IndexFlatIP(d))
+start_id = index.ntotal
+num_new = embs.shape[0]
+ids = np.arange(start_id, start_id + num_new)
+index.add_with_ids(embs, ids)
+faiss.write_index(index, "book_embeddings.faiss")
 
-def query(query:str):
-    query_vec = model.encode([query], convert_to_numpy=True).astype("float32")
-    query_vec = normalize(query_vec)
-    D, I = index.search(query_vec, 5)
-    ordered_titles = []
-    for ind in I[0]:
-        ordered_titles.append(titles[ind])
-    return ordered_titles
+# def query(query:str):
+#     query_vec = model.encode([query], convert_to_numpy=True).astype("float32")
+#     query_vec = normalize(query_vec)
+#     D, I = index.search(query_vec, 5)
+#     ordered_titles = []
+#     for ind in I[0]:
+#         ordered_titles.append(titles[ind])
+#     return ordered_titles
 
 
-if len(sys.argv) > 1:
-    result = query(sys.argv[1])
-    for r in result:
-        print(r)    
+# if len(sys.argv) > 1:
+#     result = query(sys.argv[1])
+#     for r in result:
+#         print(r)    

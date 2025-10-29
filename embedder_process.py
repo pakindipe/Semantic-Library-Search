@@ -1,11 +1,14 @@
 from sentence_transformers import SentenceTransformer
+import numpy as np
 import sys, json
 
 model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 
 def handle(op, payload):
     if op == "embed_one":
-        return model.encode(payload)
+        emb = model.encode(payload)
+        vec_list = emb.tolist()
+        return {"vector": vec_list}
 
 
 def main():
