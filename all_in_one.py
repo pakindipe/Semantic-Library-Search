@@ -18,15 +18,24 @@ class DB:
     def _init_schema(self):
         schema = """
         CREATE TABLE IF NOT EXISTS books (
-        id INTEGER PRIMARY KEY
-        title TEXT NOT NULL
-        author TEXT
-        genre TEXT
+        id INTEGER PRIMARY KEY,
+        title TEXT NOT NULL,
+        author TEXT,
+        genre TEXT,
         year_published INTEGER
         )
         """
         with self._conn() as c:
             c.executescript(schema)
+    
+    def metadata_query(self, ids):
+        with self._conn() as conn:
+            placeholders = ', '.join(['?']*len(ids))
+            query = f"SELECT * FROM books WHERE id IN  ({placeholders})"
+            cur = conn.cursor()
+            cur.execute(query, ids)
+            rows = cur.fetchall()
+            return rows
 
 
 
@@ -34,7 +43,8 @@ def handle(op, payload):
     if op == "query":
         query_vec = model.encode(payload)
         D,I = index.search(query_vec.reshape(1, -1).astype('float32'), 5)
-        return {"top 5 matches": I[0].tolist()}
+        rows = db.metadata_query(I[0].tolist())
+        return [dict(row) for row in rows]
 
 
 def main():
@@ -52,4 +62,5 @@ def main():
 if __name__ == "__main__":
     model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
     index = faiss.read_index("book_embeddings.faiss")
+    db = DB()
     main()

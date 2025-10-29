@@ -1,5 +1,6 @@
 # Build artifacts
 .venv
+books.db
 build/
 export/
 *.o
