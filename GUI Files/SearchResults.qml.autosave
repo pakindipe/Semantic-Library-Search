@@ -265,7 +265,6 @@ Page {
         BookDetails {}
     }
     function loadResults(){
-       // totalPages = Math.ceil(allBooks.length/booksPerPage)
         //startIndex = (currentPage-1)*booksPerPage
         //endIndex = startIndex + booksPerPage
 
