@@ -22,7 +22,8 @@ class DB:
         title TEXT NOT NULL,
         author TEXT,
         genre TEXT,
-        year_published INTEGER
+        year_published INTEGER, 
+        availability BOOLEAN
         )
         """
         with self._conn() as c:
