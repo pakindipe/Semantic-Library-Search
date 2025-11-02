@@ -164,7 +164,6 @@ Page {
             }
 
             Repeater{
-                // 🚀 switch from your ListModel to the C++ model
                 model: resultsModel
 
                 delegate: Rectangle{
@@ -191,7 +190,6 @@ Page {
 
                         Column{
                             spacing: 3
-                            // ⬇️ roles come from ResultsModel::roleNames()
                             Text{ text: "Title: "   + title;   font.bold: true }
                             Text{ text: "Author: "  + author;  font.bold: true }
                             Text{
