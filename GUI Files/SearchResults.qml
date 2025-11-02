@@ -110,6 +110,31 @@ Page {
         MenuItem{
             text: "Sort by Release Year"
         }
+        Menu{
+            title: "Sort by Genre"
+
+            MenuItem{
+                text:  "Autobiography"
+            }
+            MenuItem{
+                text:  "Fantasy"
+            }
+            MenuItem{
+                text:  "Fiction"
+            }
+            MenuItem{
+                text:  "Horror"
+            }
+            MenuItem{
+                text:  "Mystery"
+            }
+            MenuItem{
+                text:  "Romance"
+            }
+            MenuItem{
+                text:  "Science Fiction"
+            }
+        }
     }
 
     ScrollView{
