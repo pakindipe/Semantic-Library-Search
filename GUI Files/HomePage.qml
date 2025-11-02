@@ -6,7 +6,6 @@ import QtQuick.Effects
 Page {
     anchors.fill: parent
     signal doSearch(string query)
-
     header: Rectangle {
         height: 50
         color: "#374151"
@@ -19,7 +18,6 @@ Page {
             anchors.centerIn: parent
         }
     }
-
     Rectangle{
         id: searchBar
         anchors.top: header.bottom
@@ -27,42 +25,23 @@ Page {
         anchors.right: parent.right
         height: 80
         color: "#9CA3AF"
-
         Column{
             anchors.centerIn: parent
             spacing: 10
-
             Row{
                 spacing: 10
-
                 TextField{
                     id: s
                     placeholderText: "Search Books..."
                     font.pointSize: 14
                     width: 420
                     height: 27.5
-                    focus: true    // focus so Enter works immediately
                     background: Rectangle{
                         radius: 8
                         color: "White"
                         border.color: "Gray"
                     }
-
-                    // handle Enter on the TextField
-                    Keys.onReturnPressed: {
-                        const q = s.text.trim()
-                        if (q.length > 0) {
-                            // optional: hit controller
-                            if (typeof searchController !== "undefined" && searchController.search) {
-                                searchController.search(q)
-                            }
-
-                            doSearch(q)
-                            s.text = ""       // clear after dispatch
-                        }
-                    }
                 }
-
                 Button {
                     enabled: s.text.trim() !== ""
                     text: "Search";
@@ -71,30 +50,20 @@ Page {
                         radius: 8
                     }
                     onClicked:  {
-                        const q = s.text.trim()
-                        if (q.length > 0) {
-                            // optional: hit controller (your branch logic)
-                            if (typeof searchController !== "undefined" && searchController.search) {
-                                searchController.search(q)
-                            }
-
-                            doSearch(q)
-                            s.text = ""       // clear after dispatch
-                        }
+                        searchController.search(s.text)
+                        doSearch(s.text)
+                    }
+                }
+                Keys.onReturnPressed: {
+                    if (s.text.trim() !== ""){
+                        doSearch(s.text)
                     }
                 }
             }
+
         }
     }
-
-    // When doSearch is emitted, push SearchResults.qml with the query
-    onDoSearch: StackView.view.push(
-        Qt.resolvedUrl("SearchResults.qml"),
-        { "query": query }
-    )
-
-    // ---- Popular Books section from your branch ----
-
+    onDoSearch: StackView.view.push(Qt.resolvedUrl("SearchResults.qml"),{ "query": s.text })
     Text {
         id: popular
         anchors.top: searchBar.bottom
@@ -106,7 +75,6 @@ Page {
         font.bold: true
         color: "#374151"
     }
-
     Column{
         id: resultsArea
         spacing: 1
@@ -114,26 +82,24 @@ Page {
         anchors.margins: 10
         anchors.left: parent.left
         anchors.right: parent.right
-
-        ListModel { id: books }
+        ListModel {id: books}
 
         Component.onCompleted: {
-            // demo data
             books.append({ title: "To Kill a Mockingbird", author: "Harper Lee", genre: "Gothic Novel", release: "1960" })
             books.append({ title: "To Kill a Kingdom", author: "Alexandra Christo", genre: "Fantasy", release: "2018" })
             books.append({ title: "The Mockingbird Next Door", author: "Marja Mills", genre: "Autobiography", release: "2014" })
         }
-
         Repeater{
             model: books
             delegate: Rectangle{
                 id: card
                 anchors.horizontalCenter: parent.horizontalCenter
-                width: parent.width * 0.85
+                width: parent.width*0.85
                 height: 110
                 radius: 15
                 color: "White"
                 border.color: "Gray"
+
 
                 Row{
                     anchors.fill: parent
@@ -146,13 +112,13 @@ Page {
                         radius: 4
                         color: "Black"
                     }
-
                     Column{
+                        Text{text: "Title: " + title; font.bold:true}
+                        Text{text: "Author: " + author; font.bold:true}
+                        Text{text: "Genre: " + genre; font.bold:true}
+                        Text{text: "Release: " + release; font.bold:true}
                         spacing: 3
-                        Text { text: "Title: " + title;   font.bold: true }
-                        Text { text: "Author: " + author; font.bold: true }
-                        Text { text: "Genre: " + genre;   font.bold: true }
-                        Text { text: "Release: " + release; font.bold: true }
+
                     }
                 }
 
@@ -183,9 +149,9 @@ Page {
             }
         }
     }
-
     Component {
         id: bookDetailsComponent
         BookDetails {}
     }
 }
+
