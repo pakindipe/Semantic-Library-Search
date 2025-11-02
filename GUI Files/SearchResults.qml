@@ -32,6 +32,7 @@ Page {
                 }
                 onClicked: stackView.pop();
             }
+
         }
     }
 
@@ -48,6 +49,14 @@ Page {
             spacing: 10
             Row{
                 spacing: 10
+                Button{
+                    text: "Filters";
+                    background: Rectangle {
+                        color: "#E5E7EB"
+                        radius: 10
+                    }
+                    onClicked: filterMenu.open()
+                }
                 TextField{
                     id: s
                     placeholderText: "Search Books..."
@@ -90,6 +99,19 @@ Page {
             }
         }
     }
+    Menu{
+        id: filterMenu
+        MenuItem{
+            text: "Sort by Title"
+        }
+        MenuItem{
+            text: "Sort by Author"
+        }
+        MenuItem{
+            text: "Sort by Release Year"
+        }
+    }
+
     ScrollView{
         id: scroll
         spacing: 1
@@ -265,7 +287,6 @@ Page {
         BookDetails {}
     }
     function loadResults(){
-       // totalPages = Math.ceil(allBooks.length/booksPerPage)
         //startIndex = (currentPage-1)*booksPerPage
         //endIndex = startIndex + booksPerPage
 
