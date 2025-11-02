@@ -39,4 +39,4 @@ add_book("The Infinite Within")
 if len(sys.argv) > 1:
     result = query(sys.argv[1])
     for r in result:
-        print(r)    
+        print(r)
