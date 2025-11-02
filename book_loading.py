@@ -16,6 +16,19 @@ def _conn():
     c.row_factory = sqlite3.Row
     return c
 
+schema = """
+CREATE TABLE IF NOT EXISTS books (
+id INTEGER PRIMARY KEY,
+title TEXT NOT NULL,
+author TEXT,
+genre TEXT,
+year_published INTEGER, 
+availability BOOLEAN
+)
+"""
+with _conn() as c:
+    c.executescript(schema)
+
 with _conn() as c:
     for ind, row in df.iterrows():
         emb = model.encode(row["title"])
