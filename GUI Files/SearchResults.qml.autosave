@@ -5,28 +5,43 @@ import QtQuick.Effects
 
 Page {
     anchors.fill: parent
+    property string query: ""
     property int currentPage: 1
     property int booksPerPage: 10
+    Component.onCompleted: loadResults(query)
     property int totalPages: 5
-    signal doSearch(string query)
     header: Rectangle {
         height: 50
         color: "#374151"
         Text {
             text: "Semantic Search System";
             font.pointSize: 20
-            font.bold: true
             color: "white"
+            font.bold: true
             font.family: "Times New Roman"
             anchors.centerIn: parent
         }
+        RowLayout {
+            anchors.fill: parent
+
+            Button{
+                text: "Home";
+                background: Rectangle {
+                    color: "#E5E7EB"
+                    radius: 8
+                }
+                onClicked: stackView.pop();
+            }
+
+        }
     }
+
     Rectangle{
         id: searchBar
         anchors.top: header.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        height: 80
+        height: 100
         color: "#9CA3AF"
         Column{
             anchors.centerIn: parent
@@ -52,6 +67,14 @@ Page {
                         color: "White"
                         border.color: "Gray"
                     }
+                    Keys.onReturnPressed: {
+                        if (s.text.trim() !== "") {
+                            query = s.text
+                            currentPage = 1
+                            loadResults()
+                            s.text = ""
+                        }
+                    }
                 }
                 Button {
                     enabled: s.text.trim() !== ""
@@ -61,16 +84,18 @@ Page {
                         radius: 8
                     }
                     onClicked:  {
-                        doSearch(s.text)
-                    }
-                }
-                Keys.onReturnPressed: {
-                    if (s.text.trim() !== ""){
-                        doSearch(s.text)
+                        query = s.text
+                        currentPage = 1
+                        loadResults()
+                        s.text = ""
                     }
                 }
             }
-
+            Label {
+                text: "Results for: " + query;
+                font.pointSize: 14
+                font.bold: true
+            }
         }
     }
     Menu{
@@ -113,86 +138,90 @@ Page {
             }
         }
     }
-    onDoSearch: StackView.view.push(Qt.resolvedUrl("SearchResults.qml"),{ "query": s.text })
-    Text {
-        id: popular
-        anchors.top: searchBar.bottom
-        anchors.margins: 20
-        anchors.topMargin: 10
-        text: "Popular Books"
-        anchors.horizontalCenter: parent.horizontalCenter
-        font.pointSize: 18
-        font.bold: true
-        color: "#374151"
-    }
-    Column{
-        id: resultsArea
+
+    ScrollView{
+        id: scroll
         spacing: 1
-        anchors.top: popular.bottom
-        anchors.margins: 10
+        anchors.top: searchBar.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        ListModel {id: books}
+        anchors.bottom: pagination.top
+        anchors.margins: 20
+        clip: true
+        Column{
+            spacing: 3
+            id: resultsArea
+            width: scroll.width
+            ListModel {id: books}
 
-        Component.onCompleted: {
+            Component.onCompleted: {
             books.append({ title: "To Kill a Mockingbird", author: "Harper Lee", genre: "Gothic Novel", release: "1960" })
             books.append({ title: "To Kill a Kingdom", author: "Alexandra Christo", genre: "Fantasy", release: "2018" })
             books.append({ title: "The Mockingbird Next Door", author: "Marja Mills", genre: "Autobiography", release: "2014" })
-        }
-        Repeater{
-            model: books
-            delegate: Rectangle{
-                id: card
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: parent.width*0.85
-                height: 110
-                radius: 15
-                color: "White"
-                border.color: "Gray"
+            books.append({ title: "Go Set a Watchman", author: "Harper Lee", genre: "Fiction", release: "2015" })
+            books.append({ title: "Mockingbird Songs", author: "R.J. Heatley", genre: "Poetry", release: "2019" })
+            books.append({ title: "Killing Time", author: "Linda Howard", genre: "Thriller", release: "2005" })
+            books.append({ title: "The Killing", author: "Robert Muchamore", genre: "Young Adult", release: "2008" })
+            books.append({ title: "Birds of America", author: "Lorrie Moore", genre: "Short Stories", release: "1998" })
+            books.append({ title: "The Bird King", author: "G. Willow Wilson", genre: "Historical Fiction", release: "2019" })
+            books.append({ title: "Birdsong", author: "Sebastian Faulks", genre: "War Fiction", release: "1993" })
+            books.append({ title: "The Birds", author: "Daphne du Maurier", genre: "Horror", release: "1952" })
+            books.append({ title: "Bird Box", author: "Josh Malerman", genre: "Horror", release: "2014" })
+            }
+            Repeater{
+                model: books
+                delegate: Rectangle{
+                    id: card
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: parent.width*0.85
+                    height: 110
+                    radius: 15
+                    color: "White"
+                    border.color: "Gray"
 
-                Row{
-                    anchors.fill: parent
-                    anchors.margins: 10
-                    spacing: 20
+                    Row{
+                        anchors.fill: parent
+                        anchors.margins: 10
+                        spacing: 20
 
-                    Rectangle{
-                        width: 70
-                        height: 80
-                        radius: 4
-                        color: "Black"
+                        Rectangle{
+                            width: 70
+                            height: 80
+                            radius: 4
+                            color: "Black"
+                        }
+                        Column{
+                            Text{text: "Title: " + title; font.bold:true}
+                            Text{text: "Author: " + author; font.bold:true}
+                            Text{text: "Genre: " + genre; font.bold:true}
+                            Text{text: "Release: " + release; font.bold:true}
+                            spacing: 3
+                        }
                     }
-                    Column{
-                        Text{text: "Title: " + title; font.bold:true}
-                        Text{text: "Author: " + author; font.bold:true}
-                        Text{text: "Genre: " + genre; font.bold:true}
-                        Text{text: "Release: " + release; font.bold:true}
-                        spacing: 3
 
-                    }
-                }
-
-                MouseArea{
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onEntered: {
-                        card.border.color = "Gray"
-                        card.border.width = 2
-                    }
-                    onExited: {
-                        card.border.width = 1
-                        card.border.color = "Black"
-                    }
-                    onClicked: {
-                        var dialog = bookDetailsComponent.createObject(parent, {
-                            "titleText": title,
-                            "author": author,
-                            "genres": genre,
-                            "releaseDate": release,
-                            "description": "sample description for " + title + ". this would come from the database or API.",
-                            "image": ""
-                        })
-                        dialog.open()
+                    MouseArea{
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onEntered: {
+                            card.border.color = "Gray"
+                            card.border.width = 2
+                        }
+                        onExited: {
+                            card.border.width = 1
+                            card.border.color = "Black"
+                        }
+                        onClicked: {
+                            var dialog = bookDetailsComponent.createObject(parent, {
+                                "titleText": title,
+                                "author": author,
+                                "genres": genre,
+                                "releaseDate": release,
+                                "description": "sample description for " + title + ". this would come from the database or API.",
+                                "image": ""
+                            })
+                            dialog.open()
+                        }
                     }
                 }
             }
@@ -278,9 +307,16 @@ Page {
             }
         }
     }
+
     Component {
         id: bookDetailsComponent
         BookDetails {}
+    }
+    function loadResults(){
+        //startIndex = (currentPage-1)*booksPerPage
+        //endIndex = startIndex + booksPerPage
+
+        //for (int i = startIndex; i < endIndex; i++){books.append()}
     }
 }
 

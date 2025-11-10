@@ -70,10 +70,10 @@ Page {
                     }
                     Keys.onReturnPressed: {
                         if (s.text.trim() !== "") {
-                             query = s.text
-                             currentPage = 1
-                             loadResults()
-                             s.text = ""
+                            query = s.text
+                            currentPage = 1
+                            loadResults()
+                            s.text = ""
                         }
                     }
                 }
@@ -102,7 +102,7 @@ Page {
     Menu{
         id: filterMenu
         MenuItem{
-            text: "Sort by Title"
+            text: "Reset Filters"
         }
         MenuItem{
             text: "Sort by Author"
@@ -133,6 +133,9 @@ Page {
             }
             MenuItem{
                 text:  "Science Fiction"
+            }
+            MenuItem{
+                text:  "Thriller"
             }
         }
     }
@@ -176,7 +179,6 @@ Page {
                     radius: 15
                     color: "White"
                     border.color: "Gray"
-
 
                     Row{
                         anchors.fill: parent
