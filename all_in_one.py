@@ -43,7 +43,7 @@ class DB:
 def handle(op, payload):
     if op == "query":
         query_vec = model.encode(payload)
-        D,I = index.search(query_vec.reshape(1, -1).astype('float32'), 5)
+        D,I = index.search(query_vec.reshape(1, -1).astype('float32'), 50)
         rows = db.metadata_query(I[0].tolist())
         return [dict(row) for row in rows]
 
