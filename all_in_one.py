@@ -37,6 +37,14 @@ class DB:
             cur.execute(query, ids)
             rows = cur.fetchall()
             return rows
+    
+    def homepage_query(self):
+        with self._conn() as conn:
+            query = "SELECT * FROM books ORDER BY title ASC LIMIT 50"
+            cur = conn.cursor()
+            cur.execute(query)
+            rows = cur.fetchall()
+            return rows
 
 
 
@@ -46,6 +54,10 @@ def handle(op, payload):
         D,I = index.search(query_vec.reshape(1, -1).astype('float32'), 50)
         rows = db.metadata_query(I[0].tolist())
         return [dict(row) for row in rows]
+    elif op == "homepage_display":
+        rows = db.homepage_query()
+        return [dict(row) for row in rows]
+
 
 
 def main():
