@@ -12,6 +12,20 @@ qt_add_executable(appLibrarySemanticSearch
     main.cpp
 )
 
+target_sources(appLibrarySemanticSearch
+    PRIVATE
+        book.cpp
+        bookConversion.cpp
+        ResultsModel.cpp
+        searchController.cpp
+        date.cpp
+        ResultModel.h
+        searchcontroller.h
+        bookdto.h
+        bookConversion.h
+        book.h
+        date.h
+)
 qt_add_qml_module(appLibrarySemanticSearch
     URI LibrarySemanticSearch
     VERSION 1.0

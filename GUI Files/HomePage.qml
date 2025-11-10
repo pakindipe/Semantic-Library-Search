@@ -61,6 +61,7 @@ Page {
                         radius: 8
                     }
                     onClicked:  {
+                        searchController.search(s.text)
                         doSearch(s.text)
                     }
                 }
