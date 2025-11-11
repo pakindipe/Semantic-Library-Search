@@ -61,6 +61,8 @@ def handle(op, payload):
 
 
 def main():
+    flag = {"flag": "model is loaded"}
+    sys.stdout.write(json.dumps(flag) + "\n")
     for raw in sys.stdin:
         line = raw.strip()
         msg = json.loads(line)
