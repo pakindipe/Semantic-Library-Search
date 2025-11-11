@@ -40,7 +40,7 @@ class DB:
     
     def homepage_query(self):
         with self._conn() as conn:
-            query = "SELECT * FROM books ORDER BY title ASC LIMIT 50"
+            query = "SELECT * FROM books ORDER BY RANDOM() LIMIT 50"
             cur = conn.cursor()
             cur.execute(query)
             rows = cur.fetchall()
