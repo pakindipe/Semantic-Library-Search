@@ -17,14 +17,16 @@ def _conn():
     return c
 
 schema = """
-CREATE TABLE IF NOT EXISTS books (
+DROP TABLE IF EXISTS books;
+
+CREATE TABLE books (
 id INTEGER PRIMARY KEY,
 title TEXT NOT NULL,
 author TEXT,
 genre TEXT,
 year_published INTEGER, 
 availability BOOLEAN
-)
+);
 """
 with _conn() as c:
     c.executescript(schema)
