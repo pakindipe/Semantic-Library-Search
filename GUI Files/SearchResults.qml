@@ -105,7 +105,8 @@ Page {
             text: "Reset Filters"
         }
         MenuItem{
-            text: "Sort by Author"
+            text: "Filter by Author"
+            onClicked: authorSearch.open()
         }
         MenuItem{
             text: "Sort by Release Year"
@@ -136,6 +137,40 @@ Page {
             }
             MenuItem{
                 text:  "Thriller"
+            }
+        }
+    }
+    Dialog {
+        id: authorSearch
+        title: "Filter by Author"
+        modal: true
+        anchors.centerIn: parent
+        width: 200
+        height: 135
+        standardButtons: Dialog.Ok | Dialog.Cancel
+        Column{
+            anchors.fill: parent
+            TextField{
+                id: aSearch
+                placeholderText: "Search for author..."
+                width: 150
+                onTextChanged: filterAuthors()
+
+                onAccepted:{
+                    if (aSearch.text.trim() !== "") {
+                        query = aSearch.text
+                        loadResults()
+                        aSearch.text = ""
+                    }
+                }
+
+                Keys.onReturnPressed: {
+                    if (aSearch.text.trim() !== "") {
+                        query = aSearch.text
+                        loadResults()
+                        aSearch.text = ""
+                    }
+                }
             }
         }
     }

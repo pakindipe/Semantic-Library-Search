@@ -52,6 +52,11 @@ Page {
                         color: "White"
                         border.color: "Gray"
                     }
+                    Keys.onReturnPressed: {
+                        if (s.text.trim() !== ""){
+                            doSearch(s.text)
+                        }
+                    }
                 }
                 Button {
                     enabled: s.text.trim() !== ""
@@ -62,11 +67,6 @@ Page {
                     }
                     onClicked:  {
                         searchController.search(s.text)
-                        doSearch(s.text)
-                    }
-                }
-                Keys.onReturnPressed: {
-                    if (s.text.trim() !== ""){
                         doSearch(s.text)
                     }
                 }
@@ -126,79 +126,98 @@ Page {
         font.bold: true
         color: "#374151"
     }
-    Column{
-        id: resultsArea
+    ScrollView{
+        id: scroll
         spacing: 1
-        anchors.top: popular.bottom
-        anchors.margins: 10
+        anchors.top: searchBar.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        ListModel {id: books}
+        anchors.bottom: pagination.top
+        anchors.margins: 20
+        clip: true
 
-        Component.onCompleted: {
-            books.append({ title: "To Kill a Mockingbird", author: "Harper Lee", genre: "Gothic Novel", release: "1960" })
-            books.append({ title: "To Kill a Kingdom", author: "Alexandra Christo", genre: "Fantasy", release: "2018" })
-            books.append({ title: "The Mockingbird Next Door", author: "Marja Mills", genre: "Autobiography", release: "2014" })
-        }
-        Repeater{
-            model: books
-            delegate: Rectangle{
-                id: card
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: parent.width*0.85
-                height: 110
-                radius: 15
-                color: "White"
-                border.color: "Gray"
+        Column{
+            spacing: 3
+            id: resultsArea
+            width: scroll.width
 
-                Row{
-                    anchors.fill: parent
-                    anchors.margins: 10
-                    spacing: 20
-
-                    Rectangle{
-                        width: 70
-                        height: 80
-                        radius: 4
-                        color: "Black"
-                    }
-                    Column{
-                        Text{text: "Title: " + title; font.bold:true}
-                        Text{text: "Author: " + author; font.bold:true}
-                        Text{text: "Genre: " + genre; font.bold:true}
-                        Text{text: "Release: " + release; font.bold:true}
-                        spacing: 3
-
-                    }
+            // Optional empty state
+            Item {
+                visible: resultsModel.count === 0
+                width: parent.width; height: 120
+                Text {
+                    anchors.centerIn: parent
+                    text: "No results yet. Try a search."
+                    opacity: 0.7
                 }
+            }
 
-                MouseArea{
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onEntered: {
-                        card.border.color = "Gray"
-                        card.border.width = 2
+            Repeater{
+                model: resultsModel
+
+                delegate: Rectangle{
+                    id: card
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: parent.width * 0.85
+                    height: 110
+                    radius: 15
+                    color: "White"
+                    border.color: "Gray"
+
+                    Row{
+                        anchors.fill: parent
+                        anchors.margins: 10
+                        spacing: 20
+
+                        Rectangle{
+                            width: 70
+                            height: 80
+                            radius: 4
+                            color: "Black"
+                            opacity: available ? 1.0 : 0.5   // dim if not available
+                        }
+
+                        Column{
+                            spacing: 3
+                            Text{ text: "Title: "   + title;   font.bold: true }
+                            Text{ text: "Author: "  + author;  font.bold: true }
+                            Text{
+                                // genres is a QStringList from the model
+                                text: "Genres: " + genres.join(", ")
+                                font.bold: true
+                            }
+                            Text{
+                                // releaseDate is a QDate from the model
+                                text: "Release: " + releaseDate.toString("yyyy-MM-dd")
+                                font.bold: true
+                            }
+                        }
                     }
-                    onExited: {
-                        card.border.width = 1
-                        card.border.color = "Black"
-                    }
-                    onClicked: {
-                        var dialog = bookDetailsComponent.createObject(parent, {
-                            "titleText": title,
-                            "author": author,
-                            "genres": genre,
-                            "releaseDate": release,
-                            "description": "sample description for " + title + ". this would come from the database or API.",
-                            "image": ""
-                        })
-                        dialog.open()
+
+                    MouseArea{
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onEntered: { card.border.color = "Gray";  card.border.width = 2 }
+                        onExited:  { card.border.width = 1;       card.border.color = "Black" }
+                        onClicked: {
+                            // pass the model data straight into your dialog
+                            var dialog = bookDetailsComponent.createObject(parent, {
+                                "titleText": title,
+                                "author": author,
+                                "genres": genres.join(", "),
+                                "releaseDate": releaseDate.toString(Qt.DefaultLocaleShortDate),
+                                "description": description,
+                                "image": ""   // keep as-is for now
+                            })
+                            dialog.open()
+                        }
                     }
                 }
             }
         }
     }
+
     Rectangle{
         id: pagination
         anchors.bottom: parent.bottom
@@ -278,6 +297,12 @@ Page {
                 }
             }
         }
+    }
+    function loadResults(){
+        //startIndex = (currentPage-1)*booksPerPage
+        //endIndex = startIndex + booksPerPage
+
+        //for (int i = startIndex; i < endIndex; i++){books.append()}
     }
     Component {
         id: bookDetailsComponent
