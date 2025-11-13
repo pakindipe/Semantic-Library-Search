@@ -1,6 +1,7 @@
 # Build artifacts
 .venv
 books.db
+book_embeddings.faiss
 build/
 export/
 *.o
