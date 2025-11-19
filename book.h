@@ -11,7 +11,8 @@ private:
     std::string Author;
     Date Release_Date;
     std::string Description;
-    std::vector<std::string> Genres;
+    std::string Genres;
+    std::string Filename;
     bool Availability;
 
 public:
@@ -22,22 +23,32 @@ public:
          int month,
          int day,
          std::string description,
-         std::vector<std::string> genres,
-         bool availability);
+         std::string genres,
+         bool availability = 0);
+
+    Book(std::string title,
+         std::string author,
+         int year,
+         std::string description,
+         std::string genres,
+         std::string filename,
+         bool availability = 0);
 
     // Setters
     void setTitle(std::string title);
     void setAuthor(std::string author);
     void setDescription(std::string description);
-    void setGenres(std::vector<std::string> genres);
+    void setGenres(std::string genres);
     void setAvailability(bool availability);
     void setDate(int year, int month, int day);
+    void setFilename(std::string filename);
 
     // Getters
     const std::string& getTitle() const;
     const std::string& getAuthor() const;
     const std::string& getDescription() const;
-    const std::vector<std::string>& getGenres() const;
+    const std::string& getGenres() const;
+    const std::string& getFilename() const;
     bool getAvailability() const;
     Date getReleaseDate() const;
 

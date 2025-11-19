@@ -60,3 +60,12 @@ install(TARGETS appLibrarySemanticSearch
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+
+# Copy runtime Python + DB + FAISS files into the build directory
+file(COPY
+    ${CMAKE_SOURCE_DIR}/python/all_in_one.py
+    ${CMAKE_SOURCE_DIR}/python/books.db
+    ${CMAKE_SOURCE_DIR}/python/book_embeddings.faiss
+    ${CMAKE_SOURCE_DIR}/python/covers
+    DESTINATION ${CMAKE_BINARY_DIR}
+)

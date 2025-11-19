@@ -2,12 +2,27 @@ import QtQuick 2.15
 import QtQuick.Layouts 1.15
 import QtQuick.Controls 2.15
 import QtQuick.Effects
+import QtQml 2.15
 
 Page {
     anchors.fill: parent
     property int currentPage: 1
     property int booksPerPage: 10
     property int totalPages: 5
+
+    function formatGenre(g) {
+        if (!g || g.length === 0)
+            return "";
+
+        // Split on underscores and capitalize each word
+        var parts = g.split("_");
+        for (var i = 0; i < parts.length; i++) {
+            if (parts[i].length > 0)
+                parts[i] = parts[i].charAt(0).toUpperCase() + parts[i].slice(1);
+        }
+        return parts.join(" ");
+    }
+
     signal doSearch(string query)
     header: Rectangle {
         height: 50
@@ -52,11 +67,6 @@ Page {
                         color: "White"
                         border.color: "Gray"
                     }
-                    Keys.onReturnPressed: {
-                        if (s.text.trim() !== ""){
-                            doSearch(s.text)
-                        }
-                    }
                 }
                 Button {
                     enabled: s.text.trim() !== ""
@@ -70,6 +80,12 @@ Page {
                         doSearch(s.text)
                     }
                 }
+                Keys.onReturnPressed: {
+                    if (s.text.trim() !== ""){
+                        searchController.search(s.text)
+                        doSearch(s.text)
+                    }
+                }
             }
 
         }
@@ -78,77 +94,69 @@ Page {
         id: filterMenu
         MenuItem{
             text: "Reset Filters"
+            onTriggered: popularModel.setFilter("")
         }
         MenuItem{
             text: "Filter by Author"
-            onClicked: authorSearch.open()
-        }
-        MenuItem{
-            text: "Sort by Release Year"
+             onTriggered: authorDialog.open()
         }
         Menu{
-            title: "Sort by Genre"
-
-            MenuItem{
-                text:  "Autobiography"
-            }
-            MenuItem{
-                text:  "Fantasy"
-            }
-            MenuItem{
-                text:  "Fiction"
-            }
-            MenuItem{
-                text:  "Horror"
-            }
-            MenuItem{
-                text:  "Mystery"
-            }
-            MenuItem{
-                text:  "Romance"
-            }
-            MenuItem{
-                text:  "Science Fiction"
-            }
-            MenuItem{
-                text:  "Thriller"
-            }
+            title: "Sort by Release Year"
+            MenuItem { text: "Ascending";           onTriggered: popularModel.setFilter('Ascending') }
+            MenuItem { text: "Descending";           onTriggered: popularModel.setFilter('Descending') }
+        }
+        Menu {
+            title: "Filter by Genre"
+            MenuItem { text: "Fantasy";             onTriggered: popularModel.setFilter("fantasy") }
+            MenuItem { text: "Science Fiction";     onTriggered: popularModel.setFilter("science_fiction") }
+            MenuItem { text: "Mystery";             onTriggered: popularModel.setFilter("mystery") }
+            MenuItem { text: "Romance";             onTriggered: popularModel.setFilter("romance") }
+            MenuItem { text: "Historical Fiction";  onTriggered: popularModel.setFilter("historical_fiction") }
+            MenuItem { text: "Horror";              onTriggered: popularModel.setFilter("horror") }
+            MenuItem { text: "Young Adult";         onTriggered: popularModel.setFilter("young_adult") }
+            MenuItem { text: "Biography";           onTriggered: popularModel.setFilter("biography") }
+            MenuItem { text: "Self Help";           onTriggered: popularModel.setFilter("self_help") }
+            MenuItem { text: "Classics";            onTriggered: popularModel.setFilter("classics") }
         }
     }
     Dialog {
-        id: authorSearch
+        id: authorDialog
         title: "Filter by Author"
         modal: true
-        anchors.centerIn: parent
-        width: 200
-        height: 135
+        width: 300
+        height: 180
         standardButtons: Dialog.Ok | Dialog.Cancel
-        Column{
-            anchors.fill: parent
-            TextField{
-                id: aSearch
-                placeholderText: "Search for author..."
-                width: 150
-                onTextChanged: filterAuthors()
 
-                onAccepted:{
-                    if (aSearch.text.trim() !== "") {
-                        query = aSearch.text
-                        loadResults()
-                        aSearch.text = ""
-                    }
-                }
+        property string authorQuery: ""
+
+        Column {
+            anchors.fill: parent
+            anchors.margins: 15
+            spacing: 10
+
+            TextField {
+                id: authorField
+                placeholderText: "Enter author..."
+                text: authorDialog.authorQuery
+                onTextChanged: authorDialog.authorQuery = text
 
                 Keys.onReturnPressed: {
-                    if (aSearch.text.trim() !== "") {
-                        query = aSearch.text
-                        loadResults()
-                        aSearch.text = ""
+                    if (text.trim() !== "") {
+                        popularModel.setFilter(text.trim())
+                        authorDialog.close()
                     }
                 }
             }
         }
+
+        onAccepted: {
+            if (authorField.text.trim() !== "") {
+                popularModelModel.setFilter(authorField.text.trim())
+            }
+        }
     }
+
+
     onDoSearch: StackView.view.push(Qt.resolvedUrl("SearchResults.qml"),{ "query": s.text })
     Text {
         id: popular
@@ -162,38 +170,39 @@ Page {
         color: "#374151"
     }
     ScrollView{
-        id: scroll
-        spacing: 1
-        anchors.top: popular.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: pagination.top
-        anchors.margins: 20
-        clip: true
+            id: scroll
+            spacing: 1
+            anchors.top: popular.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: pagination.top
+            anchors.margins: 20
+            clip: true
 
-        Column{
-            spacing: 3
-            id: resultsArea
-            width: scroll.width
+            Column{
+                spacing: 3
+                id: resultsArea
+                width: scroll.width
 
-            // Optional empty state
-            Item {
-                visible: resultsModel.count === 0
-                width: parent.width; height: 120
-                Text {
-                    anchors.centerIn: parent
-                    text: "No results yet. Try a search."
-                    opacity: 0.7
+                // Optional empty state
+                Item {
+                    visible: popularModel.count === 0
+                    width: parent.width; height: 120
+                    Text {
+                        anchors.centerIn: parent
+                        text: "No results yet. Try a search."
+                        opacity: 0.7
+                    }
                 }
-            }
+
+
 
             Repeater{
-                model: resultsModel
-
+                model: popularModel
                 delegate: Rectangle{
                     id: card
                     anchors.horizontalCenter: parent.horizontalCenter
-                    width: parent.width * 0.85
+                    width: parent.width*0.85
                     height: 110
                     radius: 15
                     color: "White"
@@ -204,28 +213,21 @@ Page {
                         anchors.margins: 10
                         spacing: 20
 
-                        Rectangle{
+                        Image {
                             width: 70
                             height: 80
-                            radius: 4
-                            color: "Black"
-                            opacity: available ? 1.0 : 0.5   // dim if not available
+                            fillMode: Image.PreserveAspectFit
+                            source: "file:///" + appDir + "/covers/" + filename
+                            opacity: available ? 1.0 : 0.5
                         }
 
                         Column{
+                            Text{text: "Title: " + title; font.bold:true}
+                            Text{text: "Author: " + author; font.bold:true}
+                            Text{text: "Genre: " + formatGenre(genres); font.bold:true}
+                            Text{text: "Release: " + Qt.formatDate(releaseDate, "yyyy"); font.bold:true}
                             spacing: 3
-                            Text{ text: "Title: "   + title;   font.bold: true }
-                            Text{ text: "Author: "  + author;  font.bold: true }
-                            Text{
-                                // genres is a QStringList from the model
-                                text: "Genres: " + genres.join(", ")
-                                font.bold: true
-                            }
-                            Text{
-                                // releaseDate is a QDate from the model
-                                text: "Release: " + releaseDate.toString("yyyy-MM-dd")
-                                font.bold: true
-                            }
+
                         }
                     }
 
@@ -233,17 +235,22 @@ Page {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onEntered: { card.border.color = "Gray";  card.border.width = 2 }
-                        onExited:  { card.border.width = 1;       card.border.color = "Black" }
+                        onEntered: {
+                            card.border.color = "Gray"
+                            card.border.width = 2
+                        }
+                        onExited: {
+                            card.border.width = 1
+                            card.border.color = "Black"
+                        }
                         onClicked: {
-                            // pass the model data straight into your dialog
                             var dialog = bookDetailsComponent.createObject(parent, {
                                 "titleText": title,
                                 "author": author,
-                                "genres": genres.join(", "),
-                                "releaseDate": releaseDate.toString(Qt.DefaultLocaleShortDate),
-                                "description": description,
-                                "image": ""   // keep as-is for now
+                                "genres": formatGenre(genres),
+                                "releaseDate": releaseDate.toString("MMMM '-' dd '-' yyyy"),
+                                "description": "sample description for " + title,
+                                "image": "file:///" + appDir.replace("\\", "/") + "/covers/" + filename
                             })
                             dialog.open()
                         }
@@ -252,7 +259,6 @@ Page {
             }
         }
     }
-
     Rectangle{
         id: pagination
         anchors.bottom: parent.bottom
@@ -271,7 +277,7 @@ Page {
                 onClicked: {
                     currentPage = 1
                     pn.text = ""
-                    loadResults()
+                    popularModel.firstPage()
                 }
             }
             Button {
@@ -280,7 +286,7 @@ Page {
                 onClicked: {
                     currentPage--
                     pn.text = ""
-                    loadResults()
+                    popularModel.prevPage()
                 }
             }
 
@@ -302,7 +308,7 @@ Page {
 
                         if(num >= 1 && num <= totalPages){
                             currentPage = num
-                            loadResults()
+                            popularModel.setPage(num)
                         }
                     }
                     pn.text = ""
@@ -319,7 +325,7 @@ Page {
                 onClicked: {
                     currentPage++
                     pn.text = ""
-                    loadResults()
+                    popularModel.nextPage()
                 }
             }
             Button {
@@ -328,16 +334,10 @@ Page {
                 onClicked: {
                     currentPage = totalPages
                     pn.text = ""
-                    loadResults()
+                    popularModel.lastPage()
                 }
             }
         }
-    }
-    function loadResults(){
-        //startIndex = (currentPage-1)*booksPerPage
-        //endIndex = startIndex + booksPerPage
-
-        //for (int i = startIndex; i < endIndex; i++){books.append()}
     }
     Component {
         id: bookDetailsComponent

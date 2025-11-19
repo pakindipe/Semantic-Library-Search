@@ -9,9 +9,8 @@ BookDTO bookConvert(Book& b) {
     auto d = b.getReleaseDate();
     dto.releaseDate = QDate(d.getYear(), d.getMonth(), d.getDay());
     dto.description = QString::fromStdString(b.getDescription());
-    QStringList gl;
-    for (auto& g : b.getGenres()) gl << QString::fromStdString(g);
-    dto.genres = gl;
+    dto.genres = QString::fromStdString(b.getGenres());
+    dto.filename = QString::fromStdString(b.getFilename());
     dto.available = b.getAvailability();
     return dto;
 }

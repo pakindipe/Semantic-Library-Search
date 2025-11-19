@@ -1,0 +1,4 @@
+1. Run python/csv_generator to create the csv dataset of books and their metadata
+2. Run python/db_builder to build the database
+3. Run python/cover_downloader to get available covers (optional)
+4. Build and run in Qt Creator

@@ -9,6 +9,7 @@ struct BookDTO {
     QString author;
     QDate   releaseDate;
     QString description;
-    QStringList genres;
+    QString genres;
+    QString filename;
     bool available = false;
 };

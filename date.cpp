@@ -4,6 +4,9 @@
         Date::Date(int year, int month, int day)
             : Year(year), Month(month), Day(day) {}
 
+        Date::Date(int year)
+            : Year(year), Month(1), Day(1) {}
+
        int Date::getYear()const
        {
            return Year;

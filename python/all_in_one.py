@@ -37,32 +37,18 @@ class DB:
             cur.execute(query, ids)
             rows = cur.fetchall()
             return rows
-    
-    def homepage_query(self):
-        with self._conn() as conn:
-            query = "SELECT * FROM books ORDER BY RANDOM() LIMIT 50"
-            cur = conn.cursor()
-            cur.execute(query)
-            rows = cur.fetchall()
-            return rows
 
 
 
 def handle(op, payload):
     if op == "query":
         query_vec = model.encode(payload)
-        D,I = index.search(query_vec.reshape(1, -1).astype('float32'), 50)
+        D,I = index.search(query_vec.reshape(1, -1).astype('float32'), 5)
         rows = db.metadata_query(I[0].tolist())
         return [dict(row) for row in rows]
-    elif op == "homepage_display":
-        rows = db.homepage_query()
-        return [dict(row) for row in rows]
-
 
 
 def main():
-    flag = {"flag": "model is loaded"}
-    sys.stdout.write(json.dumps(flag) + "\n")
     for raw in sys.stdin:
         line = raw.strip()
         msg = json.loads(line)

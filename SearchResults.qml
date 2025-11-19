@@ -8,8 +8,22 @@ Page {
     property string query: ""
     property int currentPage: 1
     property int booksPerPage: 10
+
+    function formatGenre(g) {
+        if (!g || g.length === 0)
+            return "";
+
+        // Split on underscores and capitalize each word
+        var parts = g.split("_");
+        for (var i = 0; i < parts.length; i++) {
+            if (parts[i].length > 0)
+                parts[i] = parts[i].charAt(0).toUpperCase() + parts[i].slice(1);
+        }
+        return parts.join(" ");
+    }
+
     Component.onCompleted: loadResults(query)
-    property int totalPages: 5
+    property int totalPages: resultsModel.totalPages
     header: Rectangle {
         height: 50
         color: "#374151"
@@ -70,10 +84,10 @@ Page {
                     }
                     Keys.onReturnPressed: {
                         if (s.text.trim() !== "") {
-                            query = s.text
-                            currentPage = 1
-                            loadResults()
-                            s.text = ""
+                             query = s.text
+                             currentPage = 1
+                             searchController.search(query)
+                             s.text = ""
                         }
                     }
                 }
@@ -85,10 +99,8 @@ Page {
                         radius: 8
                     }
                     onClicked:  {
-                        query = s.text
                         currentPage = 1
-                        loadResults()
-                        s.text = ""
+                        searchController.search(s.text)
                     }
                 }
             }
@@ -99,79 +111,71 @@ Page {
             }
         }
     }
+
+    Dialog {
+        id: authorDialog
+        title: "Filter by Author"
+        modal: true
+        width: 300
+        height: 180
+        standardButtons: Dialog.Ok | Dialog.Cancel
+
+        property string authorQuery: ""
+
+        Column {
+            anchors.fill: parent
+            anchors.margins: 15
+            spacing: 10
+
+            TextField {
+                id: authorField
+                placeholderText: "Enter author..."
+                text: authorDialog.authorQuery
+                onTextChanged: authorDialog.authorQuery = text
+
+                Keys.onReturnPressed: {
+                    if (text.trim() !== "") {
+                        resultsModel.setFilter(text.trim())
+                        authorDialog.close()
+                    }
+                }
+            }
+        }
+
+        onAccepted: {
+            if (authorField.text.trim() !== "") {
+                resultsModel.setFilter(authorField.text.trim())
+            }
+        }
+    }
+
     Menu{
         id: filterMenu
         MenuItem{
             text: "Reset Filters"
+            onTriggered: resultsModel.setFilter("")
         }
-        MenuItem{
+        MenuItem {
             text: "Filter by Author"
-            onClicked: authorSearch.open()
-        }
-        MenuItem{
-            text: "Sort by Release Year"
+            onTriggered: authorDialog.open()
         }
         Menu{
-            title: "Sort by Genre"
-
-            MenuItem{
-                text:  "Autobiography"
-            }
-            MenuItem{
-                text:  "Fantasy"
-            }
-            MenuItem{
-                text:  "Fiction"
-            }
-            MenuItem{
-                text:  "Horror"
-            }
-            MenuItem{
-                text:  "Mystery"
-            }
-            MenuItem{
-                text:  "Romance"
-            }
-            MenuItem{
-                text:  "Science Fiction"
-            }
-            MenuItem{
-                text:  "Thriller"
-            }
+            title: "Sort by Release Year"
+            MenuItem { text: "Ascending";           onTriggered: resultsModel.setFilter('Ascending') }
+            MenuItem { text: "Descending";           onTriggered: resultsModel.setFilter('Descending') }
         }
-    }
-    Dialog {
-        id: authorSearch
-        title: "Filter by Author"
-        modal: true
-        anchors.centerIn: parent
-        width: 200
-        height: 135
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        Column{
-            anchors.fill: parent
-            TextField{
-                id: aSearch
-                placeholderText: "Search for author..."
-                width: 150
-                onTextChanged: filterAuthors()
-
-                onAccepted:{
-                    if (aSearch.text.trim() !== "") {
-                        query = aSearch.text
-                        loadResults()
-                        aSearch.text = ""
-                    }
-                }
-
-                Keys.onReturnPressed: {
-                    if (aSearch.text.trim() !== "") {
-                        query = aSearch.text
-                        loadResults()
-                        aSearch.text = ""
-                    }
-                }
-            }
+        Menu{
+            title: "Filter by Genre"
+            MenuItem { text: "Fantasy";             onTriggered: resultsModel.setFilter("fantasy") }
+            MenuItem { text: "Science Fiction";     onTriggered: resultsModel.setFilter("science_fiction") }
+            MenuItem { text: "Mystery";             onTriggered: resultsModel.setFilter("mystery") }
+            MenuItem { text: "Romance";             onTriggered: resultsModel.setFilter("romance") }
+            MenuItem { text: "Historical Fiction";  onTriggered: resultsModel.setFilter("historical_fiction") }
+            MenuItem { text: "Horror";              onTriggered: resultsModel.setFilter("horror") }
+            MenuItem { text: "Young Adult";         onTriggered: resultsModel.setFilter("young_adult") }
+            MenuItem { text: "Biography";           onTriggered: resultsModel.setFilter("biography") }
+            MenuItem { text: "Self Help";           onTriggered: resultsModel.setFilter("self_help") }
+            MenuItem { text: "Classics";            onTriggered: resultsModel.setFilter("classics") }
         }
     }
 
@@ -189,8 +193,6 @@ Page {
             spacing: 3
             id: resultsArea
             width: scroll.width
-
-            // Optional empty state
             Item {
                 visible: resultsModel.count === 0
                 width: parent.width; height: 120
@@ -218,12 +220,12 @@ Page {
                         anchors.margins: 10
                         spacing: 20
 
-                        Rectangle{
+                        Image {
                             width: 70
                             height: 80
-                            radius: 4
-                            color: "Black"
-                            opacity: available ? 1.0 : 0.5   // dim if not available
+                            fillMode: Image.PreserveAspectFit
+                            source: "file:///" + appDir + "/covers/" + filename
+                            opacity: available ? 1.0 : 0.5
                         }
 
                         Column{
@@ -232,12 +234,13 @@ Page {
                             Text{ text: "Author: "  + author;  font.bold: true }
                             Text{
                                 // genres is a QStringList from the model
-                                text: "Genres: " + genres.join(", ")
+                                text: "Genre: " + formatGenre(genres)
                                 font.bold: true
                             }
                             Text{
                                 // releaseDate is a QDate from the model
-                                text: "Release: " + releaseDate.toString("yyyy-MM-dd")
+                                text: "Release: " + Qt.formatDate(releaseDate, "yyyy")
+                                Component.onCompleted:  console.log("Formatted Time:"  + releaseDate.toString("MMMM '-' d '-' yyyy"))
                                 font.bold: true
                             }
                         }
@@ -254,10 +257,11 @@ Page {
                             var dialog = bookDetailsComponent.createObject(parent, {
                                 "titleText": title,
                                 "author": author,
-                                "genres": genres.join(", "),
-                                "releaseDate": releaseDate.toString(Qt.DefaultLocaleShortDate),
+                                "genres": formatGenre(genres),
+                                "releaseDate": releaseDate.toString("MMMM '-' dd '-' yyyy"),
                                 "description": description,
-                                "image": ""   // keep as-is for now
+                                "image": "file:///" + appDir.replace("\\", "/") + "/covers/" + filename
+
                             })
                             dialog.open()
                         }
@@ -285,7 +289,7 @@ Page {
                 onClicked: {
                     currentPage = 1
                     pn.text = ""
-                    loadResults()
+                    resultsModel.firstPage();
                 }
             }
             Button {
@@ -294,7 +298,7 @@ Page {
                 onClicked: {
                     currentPage--
                     pn.text = ""
-                    loadResults()
+                    resultsModel.prevPage()
                 }
             }
 
@@ -316,7 +320,7 @@ Page {
 
                         if(num >= 1 && num <= totalPages){
                             currentPage = num
-                            loadResults()
+                            resultsModel.setPage(num)
                         }
                     }
                     pn.text = ""
@@ -333,7 +337,7 @@ Page {
                 onClicked: {
                     currentPage++
                     pn.text = ""
-                    loadResults()
+                    resultsModel.nextPage()
                 }
             }
             Button {
@@ -342,7 +346,7 @@ Page {
                 onClicked: {
                     currentPage = totalPages
                     pn.text = ""
-                    loadResults()
+                    resultsModel.lastPage()
                 }
             }
         }
@@ -352,11 +356,6 @@ Page {
         id: bookDetailsComponent
         BookDetails {}
     }
-    function loadResults(){
-        //startIndex = (currentPage-1)*booksPerPage
-        //endIndex = startIndex + booksPerPage
 
-        //for (int i = startIndex; i < endIndex; i++){books.append()}
-    }
 }
 

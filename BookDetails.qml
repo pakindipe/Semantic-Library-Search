@@ -19,7 +19,7 @@ Dialog {
     property string genres: ""
     property string description: ""
     property string releaseDate: ""
-    property url image: ""
+    property string image: ""
 
     //Constants
     property int rowMargin: implicitWidth / 25
@@ -131,14 +131,11 @@ Dialog {
                 clip: true
 
                 //Load image to rectangle
-                Image
-                {
-                    asynchronous: true
+                Image {
+                    fillMode: Image.Stretch
                     anchors.fill: parent
-                    source: bookDetails.image
-                    fillMode: Image.PreserveAspectFit
+                    source: image
                 }
-
             }
 
             //Container for the top to the right of the image

@@ -10,6 +10,7 @@ private:
 public:
     // Constructor
     Date(int year, int month, int day);
+    Date(int year);
 
     // Getters
     int getYear() const;

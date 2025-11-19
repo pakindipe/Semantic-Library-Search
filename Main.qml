@@ -14,13 +14,13 @@ Window {
         id: stackView
         anchors.fill: parent
         initialItem: "HomePage.qml"
-        visible: flag
+        visible: searchController.backendReady
     }
     Rectangle {
         id: loadingScreen
         anchors.fill: parent
         color: "#374151"
-        visible: !flag
+        visible: !searchController.backendReady
         Column{
             anchors.centerIn: parent
 
@@ -50,7 +50,16 @@ Window {
         onTriggered: {
             console.log("Loading complete - showing main app")
             flag = true
+            searchController.initialBooks()
         }
     }
-
+    Connections {
+            target: searchController
+            function onBackendReadyChanged() {
+                if (searchController.backendReady) {
+                    console.log("Backend ready — showing main app and fetching initial books")
+                    searchController.initialBooks()
+                }
+            }
+        }
 }

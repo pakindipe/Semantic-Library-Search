@@ -1,17 +1,18 @@
-#include <iostream>
 #include <string>
-#include <vector>
 #include "date.h"
 #include "book.h"
 
     Book::Book(std::string title, std::string author, int year, int month, int day,
-               std::string description, std::vector<std::string> genres, bool availability)
+               std::string description, std::string genres, bool availability)
         : Title(std::move(title)),
         Author(std::move(author)),
         Release_Date(Date(year, month, day)),
         Description(std::move(description)),
         Genres(std::move(genres)),
         Availability(availability) {}
+
+    Book::Book(std::string title,std::string author, int year, std::string description, std::string genres, std::string filename, bool availability)
+        : Title(std::move(title)), Author(std::move(author)), Release_Date(Date(year)), Description(std::move(description)), Genres(std::move(genres)), Filename(std::move(filename)), Availability(availability) {}
 
     void Book::setTitle(std::string title)
     {
@@ -43,46 +44,14 @@
         return Description;
     }
 
-    void Book::setGenres(std::vector<std::string> genres)
+    void Book::setGenres(std::string genres)
     {
         Genres = genres;
     }
 
-    const std::vector<std::string>& Book::getGenres()const
+    const std::string& Book::getGenres()const
     {
         return Genres;
-    }
-
-    void Book::addGenre(std::string new_genre)
-    {
-        //Check if genre has already been added
-        for (std::string genre: Genres)
-        {
-            if (genre != new_genre)
-            {
-                Genres.push_back(new_genre);
-                std::cout << "Genre has been added\n";
-                return;
-            }
-        }
-        std::cout << "Genre is already in vector\n";
-        return;
-    }
-
-    void Book::removeGenre(std::string remove_genre)
-    {
-        //Check if genre is in vector
-        for (std::string genre: Genres)
-        {
-            if (genre == remove_genre)
-            {
-                Genres.pop_back();
-                std::cout << "Genre has been removed\n";
-                return;
-            }
-        }
-        std::cout << "Genre was not found\n";
-        return;
     }
 
     void Book::setAvailability(bool availability)
@@ -105,4 +74,12 @@
         Release_Date.setYear(year);
         Release_Date.setMonth(month);
         Release_Date.setDay(day);
+    }
+
+    void Book:: setFilename(std::string filename) {
+        Filename = filename;
+    }
+
+    const std::string& Book::getFilename() const {
+        return Filename;
     }
